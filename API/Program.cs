@@ -1,5 +1,9 @@
+using API.Logger;
+using Entities;
 using Interfaces;
 using Microsoft.EntityFrameworkCore;
+using NLog;
+using NLog.Extensions.Logging;
 using Repository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +14,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<Entities.RepoContext>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("applicationConnectionString")));
+builder.Services.AddDbContext<RepoContext>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("applicationConnectionString"), x => x.MigrationsAssembly("Entities")));
 builder.Services.AddCors( options =>
 {
     options.AddPolicy("defaultCorsPolicy", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
@@ -18,6 +22,16 @@ builder.Services.AddCors( options =>
 
 // Add Custom Services
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+var config = LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
+
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.ClearProviders();
+    loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
+    loggingBuilder.AddNLog(config.Configuration);
+});
+
+builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 
 
 var app = builder.Build();
