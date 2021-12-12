@@ -48,8 +48,8 @@ By default, the server will start the api on port __8000__ for __HTTP__ and __80
 
 ***PS.: This is not optimized for production, so the error return will contain Stack Traces of the error, not ideal on prod environment***
 
-***No auth has been implemented to this API. I'd suggest JWT Bearer token to communicate with the frontend and internal auth headers to communicate with other servers inside the network***
+***PS.: No auth has been implemented to this API. I'd suggest JWT Bearer token to communicate with the frontend and internal auth headers to communicate with other servers inside the network***
 
-***For the GetAllApplicationsAsync endpoint is better to implement pagination so, you won't do heavy operations on the database***
+***PS.: For the GetAllApplicationsAsync endpoint is better to implement pagination so, you won't do heavy operations on the database***
 
 
