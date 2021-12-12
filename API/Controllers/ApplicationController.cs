@@ -22,6 +22,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="repository"></param>
         /// <param name="logger"></param>
+        /// <param name="mapper"></param>
         /// <exception cref="ArgumentNullException"></exception>
         public ApplicationController(IRepositoryWrapper repository, ILoggerManager logger, IMapper mapper)
         {
