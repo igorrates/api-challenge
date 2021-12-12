@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Extensions.Logging;
 using Repository;
-
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen( options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "API - Challenge",
+        Description = "A sample ASP.NET Core Web API",
+    });
+
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 builder.Services.AddDbContext<RepoContext>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("applicationConnectionString"),
     x =>
     {
@@ -27,6 +39,8 @@ builder.Services.AddCors(options =>
 {
    options.AddPolicy("defaultCorsPolicy", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
+
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 // Add Custom Services
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();

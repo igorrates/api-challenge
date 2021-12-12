@@ -28,7 +28,7 @@ I tried implementing the patterns above as best as I could and remembered.
 
 ```bash
 # Clone the repo
-$ git clone https://github.com/igorrates/api-challenge.git
+git clone https://github.com/igorrates/api-challenge.git
 
 # Go to the project folder
 cd api-challenge
@@ -44,6 +44,10 @@ Yeah, simple as that and you be up and running.
 
 By default, the server will start the api on port __8000__ for __HTTP__ and __8001__ for __HTTPS__. The database will run on SQL Server default port __1433__
 
-***PS.: For this project, there are no worries about sensitive data, that's why you will find a generic password on the connection strings section of the app.settings.json file. A better way to handle this is to move the configuration to user secrets and configure your host, like Azure App Services, with the proper settings if you're going to deploy it.***
+***PS.: For this project, there are no worries about sensitive data, that's why you will find a generic password on the connection strings section of the app.settings.json file and docker files. A better way to handle this is to move the configuration to user secrets and configure your host, like Azure App Services, with the proper settings if you're going to deploy it.***
+
+***PS.: This is not optimized for production, so the error return will contain Stack Traces of the error, not ideal on prod environment***
+
+***No auth has been implemented to this API. I'd suggest JWT Bearer token to communicate with the frontend and internal auth headers to communicate with other servers inside the network***
 
 

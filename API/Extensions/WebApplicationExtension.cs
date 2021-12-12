@@ -3,8 +3,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class WebApplicationExtension
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="webHost"></param>
+        /// <returns></returns>
         public static WebApplication MigrateDatabase<T>(this WebApplication webHost) where T : DbContext
         {
             using (var scope = webHost.Services.CreateScope())

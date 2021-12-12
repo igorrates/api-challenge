@@ -1,29 +1,47 @@
-﻿using Entities.Models;
+﻿using AutoMapper;
+using Entities.DTO;
+using Entities.Models;
 using Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Application controller
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ApplicationController : ControllerBase
     {
         private readonly IRepositoryWrapper _repository;
         private readonly ILoggerManager _logger;
+        private IMapper _mapper;
 
-        public ApplicationController(IRepositoryWrapper repository, ILoggerManager logger)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="repository"></param>
+        /// <param name="logger"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public ApplicationController(IRepositoryWrapper repository, ILoggerManager logger, IMapper mapper)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        /// <summary>
+        /// Get all applications
+        /// </summary>
+        /// <returns>List of applications</returns>
+        /// <response code="200">All the applications</response> 
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
             try
             {
                 var applications = await _repository.Application.GetAllApplicationsAsync();
-                return Ok(applications);
+                return Ok(_mapper.Map<IEnumerable<ApplicationDTO>?>(applications));
 
             }
             catch (Exception ex)
@@ -33,6 +51,13 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Get Application by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>The application</returns>
+        /// <response code="200">Returns the application object</response>
+        /// <response code="404">If the application is not found</response>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync(int id)
         {
@@ -45,7 +70,7 @@ namespace API.Controllers
                     return NotFound();
                 }
 
-                return Ok(application);
+                return Ok(_mapper.Map<ApplicationDTO>(application));
             }
             catch (Exception ex)
             {
@@ -54,15 +79,34 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Create application
+        /// </summary>
+        /// <param name="application"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> PostAsync(Application application)
+        public async Task<IActionResult> PostAsync(ApplicationDTO application)
         {
             try
             {
-                await _repository.Application.CreateAsync(application);
+                if (application == null)
+                {
+                    _logger.LogError("Application object sent from client is null.");
+                    return BadRequest("Application object is null");
+                }
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("Invalid Application object sent from client.");
+                    return BadRequest("Invalid model object");
+                }
+
+                var entity = _mapper.Map<Application>(application);
+                await _repository.Application.CreateAsync(entity);
                 await _repository.SaveAsync();
 
-                return Ok(application);
+                var createdEntity = _mapper.Map<ApplicationDTO>(entity);
+
+                return Ok(createdEntity);
             }
             catch (Exception ex)
             {
@@ -71,14 +115,43 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Perform partial updates to the Application
+        /// </summary>
+        /// <param name="id">Id of the Application to be updated</param>
+        /// <param name="application"></param>
+        /// <returns></returns>
         [HttpPatch]
-        public async Task<IActionResult> PatchAsync(Application application)
+        public async Task<IActionResult> PatchAsync(int id, [FromBody] ApplicationDTO application)
         {
             try
             {
-                _repository.Application.Update(application);
+                if (application == null)
+                {
+                    _logger.LogError("Application object sent from client is null.");
+                    return BadRequest("Application object is null");
+                }
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("Invalid Application object sent from client.");
+                    return BadRequest("Invalid model object");
+                }
+
+                var entity = await _repository.Application.GetApplicationByIdAsync(id);
+                if (entity == null)
+                {
+                    _logger.LogWarn($"Application with id: {id}, hasn't been found in db.");
+                    return NotFound();
+                }
+
+                _mapper.Map(application, entity);
+
+                _repository.Application.Update(entity);
                 await _repository.SaveAsync();
-                return Ok(application);
+
+                var updatedEntity = _mapper.Map<ApplicationDTO>(entity);
+
+                return Ok(updatedEntity);
             }
             catch (Exception ex)
             {
@@ -87,24 +160,27 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete an Application
+        /// </summary>
+        /// <param name="id">Id of the application to be removed</param>
+        /// <returns></returns>
         [HttpDelete]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             try
             {
-                Application? entity = _repository.Application.FindByCondition(a => a.Id == id).FirstOrDefault();
-                if (entity != null)
-                { 
-                    _repository.Application.Delete(entity);
-                    await _repository.SaveAsync();
-                }
-                else
+                var entity = await _repository.Application.GetApplicationByIdAsync(id);
+                if (entity == null)
                 {
                     _logger.LogWarn($"Application with id: {id}, hasn't been found in db.");
                     return NotFound();
                 }
-
-                return Ok("Application deleted!");
+                
+                _repository.Application.Delete(entity);
+                await _repository.SaveAsync();
+                
+                return NoContent();
             }
             catch (Exception ex)
             {
