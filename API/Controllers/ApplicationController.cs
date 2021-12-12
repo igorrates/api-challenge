@@ -1,4 +1,5 @@
-﻿using Interfaces;
+﻿using Entities.Models;
+using Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,21 +9,30 @@ namespace API.Controllers
     [ApiController]
     public class ApplicationController : ControllerBase
     {
+        private readonly IRepositoryWrapper _repository;
         private readonly ILoggerManager _logger;
 
-        public ApplicationController(ILoggerManager logger)
+        public ApplicationController(IRepositoryWrapper repository, ILoggerManager logger)
         {
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IActionResult Get()
         {
-            _logger.LogInfo("Here is info message from the controller.");
-            _logger.LogDebug("Here is debug message from the controller.");
-            _logger.LogWarn("Here is warn message from the controller.");
-            _logger.LogError("Here is error message from the controller.");
-            return new string[] { "value1", "value2" };
+            var applications = _repository.Application.FindAll();
+
+            return Ok(applications.ToList());
+        }
+
+        [HttpPost] 
+        public IActionResult Post(Application application)
+        {
+            _repository.Application.Create(application);
+            _repository.Save();
+
+            return Ok(application);
         }
     }
 }

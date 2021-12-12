@@ -8,7 +8,6 @@ namespace Entities
     {
         public RepoContext(DbContextOptions<RepoContext> contextOptions) : base(contextOptions)
         {
-
         }
 
         public DbSet<Application> Applications { get; set; }

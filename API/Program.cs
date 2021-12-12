@@ -1,3 +1,4 @@
+using API.Extensions;
 using API.Logger;
 using Entities;
 using Interfaces;
@@ -5,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Extensions.Logging;
 using Repository;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,10 +16,16 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<RepoContext>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("applicationConnectionString"), x => x.MigrationsAssembly("Entities")));
-builder.Services.AddCors( options =>
+builder.Services.AddDbContext<RepoContext>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("applicationConnectionString"),
+    x =>
+    {
+        x.MigrationsAssembly("Entities");
+        x.EnableRetryOnFailure(3);
+
+    }));
+builder.Services.AddCors(options =>
 {
-    options.AddPolicy("defaultCorsPolicy", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+   options.AddPolicy("defaultCorsPolicy", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 
 // Add Custom Services
@@ -33,8 +41,8 @@ builder.Services.AddLogging(loggingBuilder =>
 
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 
+var app = builder.Build().MigrateDatabase<RepoContext>();
 
-var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -50,4 +58,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+
 app.Run();
+
+
