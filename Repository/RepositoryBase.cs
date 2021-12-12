@@ -16,9 +16,9 @@ namespace Repository
             RepositoryContext = repositoryContext;
         }
 
-        public void Create(T entity)
+        public async Task CreateAsync(T entity)
         {
-            RepositoryContext.Set<T>().Add(entity);
+            await RepositoryContext.Set<T>().AddAsync(entity);
         }
 
         public void Delete(T entity)

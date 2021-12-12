@@ -1,6 +1,5 @@
 ﻿using Entities.Models;
 using Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -19,20 +18,99 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> GetAsync()
         {
-            var applications = _repository.Application.FindAll();
+            try
+            {
+                var applications = await _repository.Application.GetAllApplicationsAsync();
+                return Ok(applications);
 
-            return Ok(applications.ToList());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error on GetAllApplicationsAsync()");
+                return Problem(ex.Message);
+            }
         }
 
-        [HttpPost] 
-        public IActionResult Post(Application application)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAsync(int id)
         {
-            _repository.Application.Create(application);
-            _repository.Save();
+            try
+            {
+                var application = await _repository.Application.GetApplicationByIdAsync(id);
+                if (application == null)
+                {
+                    _logger.LogWarn($"Application with id: {id}, hasn't been found in db.");
+                    return NotFound();
+                }
 
-            return Ok(application);
+                return Ok(application);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error on GetApplicationByIdAsync(id)");
+                return Problem(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostAsync(Application application)
+        {
+            try
+            {
+                await _repository.Application.CreateAsync(application);
+                await _repository.SaveAsync();
+
+                return Ok(application);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error on Create(application)");
+                return Problem(ex.Message);
+            }
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> PatchAsync(Application application)
+        {
+            try
+            {
+                _repository.Application.Update(application);
+                await _repository.SaveAsync();
+                return Ok(application);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error on Update(application)");
+                return Problem(ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                Application? entity = _repository.Application.FindByCondition(a => a.Id == id).FirstOrDefault();
+                if (entity != null)
+                { 
+                    _repository.Application.Delete(entity);
+                    await _repository.SaveAsync();
+                }
+                else
+                {
+                    _logger.LogWarn($"Application with id: {id}, hasn't been found in db.");
+                    return NotFound();
+                }
+
+                return Ok("Application deleted!");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error on Delete(id)");
+                return Problem(ex.Message);
+            }
         }
     }
 }

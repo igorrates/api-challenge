@@ -22,9 +22,9 @@ namespace Repository
                 return _applicationRepository;
             } }
 
-        public void Save()
+        public async Task SaveAsync()
         {
-            _repoContext.SaveChanges();
+            await _repoContext.SaveChangesAsync();
         }
     }
 }

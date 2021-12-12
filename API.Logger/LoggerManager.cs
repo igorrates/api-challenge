@@ -10,6 +10,10 @@ namespace API.Logger
         {
             logger.Debug(message);
         }
+        public void LogError(string message)
+        {
+            logger.Error(message);
+        }
         public void LogError(Exception ex, string message)
         {
             logger.Error(ex, message);

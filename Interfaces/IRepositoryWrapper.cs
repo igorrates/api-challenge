@@ -9,6 +9,6 @@ namespace Interfaces
     public interface IRepositoryWrapper
     {
         IApplicationRepository Application { get; }
-        void Save();
+        Task SaveAsync();
     }
 }
