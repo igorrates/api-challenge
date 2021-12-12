@@ -50,6 +50,6 @@ By default, the server will start the api on port __8000__ for __HTTP__ and __80
 
 ***No auth has been implemented to this API. I'd suggest JWT Bearer token to communicate with the frontend and internal auth headers to communicate with other servers inside the network***
 
-***For the Get All Applications endpoints is better to implement pagination so, you won't do heavy operations on the database***
+***For the GetAllApplicationsAsync endpoint is better to implement pagination so, you won't do heavy operations on the database***
 
 
