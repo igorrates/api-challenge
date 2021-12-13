@@ -16,7 +16,7 @@ namespace Repository
             return await FindAll().ToListAsync();
         }
 
-        public async Task<Application> GetApplicationByIdAsync(int id)
+        public async Task<Application?> GetApplicationByIdAsync(int id)
         {
             return await FindByCondition(app => app.Id.Equals(id)).FirstOrDefaultAsync();
         }

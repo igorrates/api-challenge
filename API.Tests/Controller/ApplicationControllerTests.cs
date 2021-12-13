@@ -157,15 +157,15 @@ namespace API.Tests.Controller
             var response = await _applicationController.PostAsync(applicationDto);
 
             response.Should().NotBeNull();
-            response.Should().BeOfType<OkObjectResult>();
-            response.As<OkObjectResult>().StatusCode.Should().Be(200);
-            response.As<OkObjectResult>().Value.Should().NotBeNull();
-            response.As<OkObjectResult>().Value.Should().BeOfType<ApplicationDTO>();
+            response.Should().BeOfType<CreatedAtRouteResult>();
+            response.As<CreatedAtRouteResult>().StatusCode.Should().Be(201);
+            response.As<CreatedAtRouteResult>().Value.Should().NotBeNull();
+            response.As<CreatedAtRouteResult>().Value.Should().BeOfType<ApplicationDTO>();
             _mockRepo.Verify(repo => repo.Application.CreateAsync(It.IsAny<Application>()), Times.Once);
-            response.As<OkObjectResult>().Value.As<ApplicationDTO>().Id.Should().Be(1);
-            response.As<OkObjectResult>().Value.As<ApplicationDTO>().Url.Should().Be("google.com");
-            response.As<OkObjectResult>().Value.As<ApplicationDTO>().PathLocal.Should().Be("path/local");
-            response.As<OkObjectResult>().Value.As<ApplicationDTO>().DebuggingMode.Should().BeTrue();
+            response.As<CreatedAtRouteResult>().Value.As<ApplicationDTO>().Id.Should().Be(1);
+            response.As<CreatedAtRouteResult>().Value.As<ApplicationDTO>().Url.Should().Be("google.com");
+            response.As<CreatedAtRouteResult>().Value.As<ApplicationDTO>().PathLocal.Should().Be("path/local");
+            response.As<CreatedAtRouteResult>().Value.As<ApplicationDTO>().DebuggingMode.Should().BeTrue();
         }
 
         [TestMethod]

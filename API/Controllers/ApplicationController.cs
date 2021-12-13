@@ -59,7 +59,7 @@ namespace API.Controllers
         /// <returns>The application</returns>
         /// <response code="200">Returns the application object</response>
         /// <response code="404">If the application is not found</response>
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "Get")]
         public async Task<IActionResult> GetAsync(int id)
         {
             try
@@ -107,7 +107,7 @@ namespace API.Controllers
 
                 var createdEntity = _mapper.Map<ApplicationDTO>(entity);
 
-                return Ok(createdEntity);
+                return CreatedAtRoute("Get", new { id = createdEntity.Id }, createdEntity);
             }
             catch (Exception ex)
             {
